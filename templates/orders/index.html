@@ -1,0 +1,524 @@
+{% extends 'orders/base.html' %}
+
+{% block style %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+
+    .container-fluid {
+        padding: 2rem 1rem;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-title {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+
+    .orders-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .orders-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .section-icon {
+        font-size: 1.8rem;
+        margin-right: 1rem;
+        padding: 0.8rem;
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+    }
+
+    .processing-icon {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        animation: pulse 2s infinite;
+    }
+
+    .orders-icon {
+        background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .section-count {
+        margin-left: auto;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .table-container {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        background: white;
+    }
+
+    .table {
+        margin: 0;
+        border: none;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 1.2rem 1rem;
+        text-align: center;
+    }
+
+    .table tbody td,
+    .table tbody th {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border-color: #e9ecef;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff, #e6f3ff);
+        transform: scale(1.01);
+    }
+
+    .order-id {
+        font-weight: 600;
+        color: #667eea;
+        font-size: 1rem;
+    }
+
+    .client-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .created-time {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .cancel-button {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        margin: 0 auto;
+    }
+
+    .cancel-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #95a5a6;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+
+    #alertContainer {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1060;
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(32, 201, 151, 0.9));
+        color: white;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(255, 107, 107, 0.9));
+        color: white;
+    }
+
+    .row-number {
+        font-weight: 600;
+        color: #95a5a6;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem 0.5rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+        }
+
+        .orders-section {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .section-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .section-count {
+            margin: 1rem 0 0 0;
+        }
+
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+
+        .table thead th,
+        .table tbody td,
+        .table tbody th {
+            padding: 0.8rem 0.5rem;
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-title {
+            font-size: 1.8rem;
+        }
+
+        .orders-section {
+            padding: 1rem;
+        }
+
+        .table thead th {
+            font-size: 0.75rem;
+            padding: 1rem 0.3rem;
+        }
+
+        .table tbody td,
+        .table tbody th {
+            padding: 1rem 0.3rem;
+            font-size: 0.8rem;
+        }
+
+        .cancel-button {
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        body {
+            background: white;
+        }
+
+        .orders-section {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+        .cancel-button {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div id="alertContainer"></div>
+
+    <div class="container-fluid">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="bi bi-printer me-2"></i>PrinterHub Dashboard
+            </h1>
+            <p class="dashboard-subtitle">Manage and track your printing orders</p>
+        </div>
+
+
+        <div id="tables" hx-get="{% url 'home' %}" hx-trigger="load delay:3s" hx-select="#tables" hx-swap="outerHTML">
+            <!-- Processing Orders Section -->
+            <div class="orders-section">
+                <div class="section-header">
+                    <div class="section-icon processing-icon">
+                        <i class="bi bi-gear-fill"></i>
+                    </div>
+                    <h2 class="section-title">Processing Orders</h2>
+                    <span class="section-count">{{ processing_orders|length }} Active</span>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Order ID</th>
+                                    <th scope="col">Client</th>
+                                    <th scope="col">Created Time</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in processing_orders %}
+                                    <tr class="order-processing">
+                                        <th scope="row" class="row-number" data-session="{{ order.session_id }}">{{ forloop.counter }}</th>
+                                        <td class="order-id" data-id="{{ order.id }}">{{ order.id }}</td>
+                                        <td class="client-name">{{ order.client }}</td>
+                                        <td class="created-time">{{ order.created_at|date:"Y-m-d H:i:s" }}</td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-clock me-1"></i>Processing
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="empty-state">
+                                            <i class="bi bi-inbox"></i>
+                                            <h3>No Orders Found</h3>
+                                            <p>There are no orders to display at the moment.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Orders Section -->
+            <div class="orders-section">
+                <div class="section-header">
+                    <div class="section-icon orders-icon">
+                        <i class="bi bi-list-ul"></i>
+                    </div>
+                    <h2 class="section-title">All Orders</h2>
+                    <span class="section-count">{{ pending_orders|length }} Total</span>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Order ID</th>
+                                    <th scope="col">Client</th>
+                                    <th scope="col">Created Time</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-orders">
+                                {% for order in pending_orders %}
+                                    <tr class="order">
+                                        <th scope="row" class="row-number" data-session="{{ order.session_id }}">{{ forloop.counter }}</th>
+                                        <td class="order-id" data-id="{{ order.id }}">{{ order.id }}</td>
+                                        <td class="client-name">{{ order.client }}</td>
+                                        <td class="created-time">{{ order.created_at|date:"Y-m-d H:i:s" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="empty-state">
+                                            <i class="bi bi-inbox"></i>
+                                            <h3>No Orders Found</h3>
+                                            <p>There are no orders to display at the moment.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Function to display alert
+        function showAlert(message, type, duration = 3000) {
+            // Remove any existing alerts to avoid stacking too many
+            while (alertContainer.firstChild) {
+                alertContainer.removeChild(alertContainer.firstChild);
+            }
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            alertContainer.appendChild(alertDiv);
+
+            // Automatically hide the alert after 'duration'
+            setTimeout(() => {
+                alertDiv.remove()
+            }, duration);
+        }
+
+        function assignCancel() {
+            const sessionID = localStorage.getItem("session")
+            if (!sessionID) {
+                return
+            }
+            console.log(sessionID)
+            // Get Rows
+            const rows = document.querySelectorAll(".order")
+            rows.forEach(row => {
+                const firstCol = row.firstElementChild
+                console.log(firstCol)
+                if (firstCol.dataset.session == sessionID) {
+                    row.insertAdjacentHTML("beforeend", "<td><div class='cancel-button'>×</div></td>")
+                }
+            })
+
+            document.querySelectorAll(".cancel-button").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    const target = e.target
+                    const parent = target.closest('tr')
+                    const orderID = parent.querySelector(".order-id").dataset.id
+
+                    fetch(`{% url 'change-order' %}`, {
+                        method : "POST",
+                        body : JSON.stringify({
+                            "session_id" : sessionID,
+                            "order_id" : orderID,
+                            "status" : "cancelled"
+                        })
+                    })
+                    .then(response => response.json().then(data => ({"message": data.message, "status": response.status})))
+                    .then(result => {
+                        if (result.status == 200) {
+                            className = "success"
+                        }
+                        else {
+                            className = "danger"
+                        }
+                        showAlert(result.message, className)
+                    })
+                    .catch(error => {
+                        showAlert(error, "danger")
+                    })
+                })
+            })
+        }
+
+        document.addEventListener("htmx:afterOnLoad", () => {
+            assignCancel()
+        })
+    </script>
+{% endblock %}

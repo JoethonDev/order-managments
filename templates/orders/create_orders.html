@@ -1,0 +1,460 @@
+{% extends 'orders/base.html' %}
+
+{% block style %}
+<style>
+    #alertContainer {
+            position: fixed; /* Fixes the alert to the viewport */
+            top: 20px;       /* Distance from the top */
+            left: 50%;       /* Center horizontally */
+            transform: translateX(-50%); /* Adjust to truly center */
+            z-index: 1060;   /* Ensure it's above other content (Bootstrap modals are 1050) */
+            width: 80%;      /* Set a max width */
+            max-width: 600px;/* Max width for larger screens */
+    }
+
+    .order-detail-item {
+        border: 1px solid #e0e0e0;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .file-upload-status {
+        margin-top: 5px;
+        font-size: 0.85em;
+    }
+    /* Style for the spinner container, ensures it's centered if needed */
+    .spinner-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 10px; /* Space between button text and spinner */
+    }
+    .btn-loading {
+        pointer-events: none; /* Prevent clicks while loading */
+        opacity: 0.7; /* Dim the button */
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div id="alertContainer"></div>
+    
+    <div class="container mt-5">
+        <h1 class="mb-4">Client Order Form</h1>
+
+        <form method="post" id="orderForm">
+            {% csrf_token %}
+                <div class="mb-3">
+                <label for="clientName" class="form-label">Client Name</label>
+                <input type="text" class="form-control" id="clientName" name="clientName" required>
+            </div>
+
+            <hr class="my-4">
+
+            <h3>Order Details</h3>
+            <div id="orderDetailsContainer">
+                <div class="order-detail-item" id="orderDetailItem">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="file" class="form-label">File</label>
+                            <input type="file" class="form-control file order-file-input" id="file" name="file" required>
+                            <div class="file-upload-status text-muted file-status" id="file-status">No file selected.</div>
+                            <input type="text" hidden class="form-control file-url" id="file-url" name="file-url">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control quantity-input" id="quantity" name="quantity" min="1" value="1" required>
+                        </div>
+                        {% for category in categories %}
+                            <div class="col-md-3">
+                                <label for="feature" class="form-label">{{ category.category_name }}</label>
+                                <select class="form-select feature-select" id="{{ category.category_name }}" name="feature" required>
+                                    {% for feature in category.features.all %}
+                                        <!-- Change condition to check if it is default value or not  -->
+                                        <option value="{{ feature.pk }}" data-price="{{ feature.price }}"
+                                        {% if forloop.counter == 1 %}
+                                            selected
+                                        {% endif %}>{{ feature.feature_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endfor %}
+                        <div class="col-md2">
+                            <label for="orderCost" class="form-label">Order Cost <span class="text-muted">this is just estimation, and may not be accurate</span></label>
+                            <input type="text" class="form-control order-cost-display" id="orderCost" name="orderCost" value="$0.00" readonly>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary mt-3" id="addOrderDetail">Add Another File</button>
+
+            <!-- <button type="submit" class="btn btn-success mt-4">Submit Order</button> -->
+            <button type="submit" class="btn btn-success mt-4 d-flex align-items-center justify-content-center" id="submitOrderButton">
+                <span id="buttonText">Submit Order</span>
+                <span class="spinner-container d-none" id="loadingSpinner">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading...</span>
+                </span>
+            </button>
+        </form>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ---- Helper Functions ----
+            // Create Session ID
+            function getClientSessionId() {
+                let sessionId = localStorage.getItem('session');
+
+                if (!sessionId) {
+                    // Generate a new UUID if one doesn't exist in session storage
+                    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                        sessionId = crypto.randomUUID();
+                        console.log('Generated new client session ID using crypto.randomUUID():', sessionId);
+                    } else {
+                        // Fallback for extremely old browsers (less ideal for true uniqueness)
+                        // This method is generally sufficient for most non-security tracking
+                        sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                            var r = Math.random() * 16 | 0,
+                                v = c == 'x' ? r : (r & 0x3 | 0x8);
+                            return v.toString(16);
+                        });
+                        console.log('Generated new client session ID using fallback method:', sessionId);
+                    }
+                    // Store it in localStorage so it persists for the browser tab's lifetime
+                    localStorage.setItem('session', sessionId);
+                } else {
+                    console.log('Retrieved existing client session ID from localStorage:', sessionId);
+                }
+
+                return sessionId;
+            }
+            
+            // Get X-CSRF-TOKEN
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                    }
+                }
+                return cookieValue;
+            }
+            // Function to show the loading spinner
+            function showLoadingSpinner() {
+                buttonText.textContent = 'Submitting...'; // Change button text
+                loadingSpinner.classList.remove('d-none'); // Show spinner
+                submitOrderButton.classList.add('btn-loading'); // Apply loading styles/disable
+                submitOrderButton.disabled = true; // Disable button
+            }
+
+            // Function to hide the loading spinner
+            function hideLoadingSpinner() {
+                buttonText.textContent = 'Submit Order'; // Revert button text
+                loadingSpinner.classList.add('d-none'); // Hide spinner
+                submitOrderButton.classList.remove('btn-loading'); // Remove loading styles
+                submitOrderButton.disabled = false; // Enable button
+            }
+
+            // Function to upload file to cloud
+            async function uploadFileToR2(fileInput, urlInput, statusElement) {
+                const file = fileInput.files[0];
+                if (!file) {
+                    statusElement.textContent = "No file selected.";
+                    fileInput.dataset.isUploaded = 'false';
+                    fileInput.dataset.r2Key = '';
+                    return false;
+                }
+
+                statusElement.textContent = `Uploading "${file.name}"... (0%)`;
+                statusElement.style.color = 'orange';
+                fileInput.dataset.isUploaded = 'false'; // Reset status
+
+                try {
+                    // 1. Request presigned URL from backend
+                    const presignedResponse = await fetch('/api/get-presigned-url/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                        body: `fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`
+                    });
+
+                    if (!presignedResponse.ok) {
+                        const errorData = await presignedResponse.json();
+                        throw new Error(`Failed to get presigned URL: ${errorData.error || presignedResponse.statusText}`);
+                    }
+                    const { presignedUrl, r2Key } = await presignedResponse.json();
+
+                    // 2. Upload file directly to R2 using the presigned URL
+                    // const formData = new FormData();
+                    // // Add all the fields from the presigned_post response
+                    // for (const key in fields) {
+                    //     formData.append(key, fields[key]);
+                    // }
+                    // formData.append('file', file); // The actual file MUST be the last field
+
+                    return new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('PUT', presignedUrl);
+
+                        xhr.upload.addEventListener('progress', function(e) {
+                            if (e.lengthComputable) {
+                                const percentComplete = (e.loaded / e.total) * 100;
+                                statusElement.textContent = `Uploading "${file.name}"... (${percentComplete.toFixed(0)}%)`;
+                                statusElement.style.color = 'orange';
+                            }
+                        });
+
+                        xhr.onreadystatechange = async function() {
+                            if (xhr.readyState === 4) {
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    statusElement.textContent = `Uploaded "${file.name}" to R2!`;
+                                    statusElement.style.color = 'green';
+                                    fileInput.dataset.isUploaded = 'true';
+                                    urlInput.value = r2Key
+                                    // fileInput.dataset.r2Key = r2Key; // Store the R2 key
+
+                                    // 3. (Optional) Confirm upload with backend
+                                    // await fetch('/api/confirm-upload/', {
+                                    //     method: 'POST',
+                                    //     headers: {
+                                    //         'Content-Type': 'application/x-www-form-urlencoded',
+                                    //         'X-CSRFToken': getCookie('csrftoken'),
+                                    //     },
+                                    //     body: `r2Key=${encodeURIComponent(r2Key)}`
+                                    // });
+                                    // resolve(true); // Resolve promise indicating success
+                                } else {
+                                    statusElement.textContent = `Upload failed for "${file.name}": ${xhr.status} ${xhr.statusText}`;
+                                    statusElement.style.color = 'red';
+                                    fileInput.dataset.isUploaded = 'false';
+                                    // fileInput.dataset.r2Key = '';
+                                    reject(new Error(`R2 upload failed: ${xhr.status} ${xhr.statusText}`));
+                                }
+                            }
+                        };
+                        xhr.send(file);
+                    });
+
+                } catch (error) {
+                    console.error("File upload error:", error);
+                    statusElement.textContent = `Upload failed: ${error.message}`;
+                    statusElement.style.color = 'red';
+                    fileInput.dataset.isUploaded = 'false';
+                    fileInput.dataset.r2Key = '';
+                    return false;
+                }
+            }
+        
+            // Function to display alert
+            function showAlert(message, type, duration = 3000) {
+                // Remove any existing alerts to avoid stacking too many
+                while (alertContainer.firstChild) {
+                    alertContainer.removeChild(alertContainer.firstChild);
+                }
+
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+
+                alertContainer.appendChild(alertDiv);
+
+                // Automatically hide the alert after 'duration'
+                setTimeout(() => {
+                    // Trigger Bootstrap's fade out animation
+                    const bsAlert = new bootstrap.Alert(alertDiv);
+                    bsAlert.dispose(); // This will trigger the fade out and then remove the element
+                                       // Alternatively, use alertDiv.classList.remove('show');
+                                       // if you want to manually remove it after the transition.
+                }, duration);
+            }
+            // ---- End Helper Functions ----
+            let orderDetailCount = 1; // Keep track of the number of order detail sections
+
+
+
+            // Constants
+            const csrftoken = getCookie('csrftoken');
+            const orderForm = document.getElementById('orderForm');
+            const orderDetailsContainer = document.getElementById('orderDetailsContainer');
+            const addOrderDetailButton = document.getElementById('addOrderDetail');
+            const submitOrderButton = document.getElementById('submitOrderButton');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const alertContainer = document.getElementById('alertContainer');
+
+
+            // Function to count pdf pages
+            function countFilePages(file) {
+                const reader = new FileReader();
+                // const fileInfo = event.target.files[0];
+                const fileInfo = file;
+                if (fileInfo) {
+                    reader.readAsBinaryString(file);
+                    const pageCount = reader.onloadend = () => {
+                        const count = reader.result.match(/\/Type[\s]*\/Page[^s]/g).length;
+                        console.log('Number of Pages:', count);
+                        return count
+                    }
+                    return pageCount()
+                }
+            }
+
+            // Function to calculate and update the order cost for a specific item
+            function updateOrderCost(itemElement) {
+                const quantityInput = itemElement.querySelector('.quantity-input');
+                const featureSelect = itemElement.querySelectorAll('.feature-select');
+                const orderCostDisplay = itemElement.querySelector('.order-cost-display');
+                const filePage = itemElement.querySelector('.file')
+                let pageCount = 1
+                let failPageCount = false
+
+                try{
+                    pageCount = countFilePages(filePage.files[0])
+                }
+                catch {
+                    failPageCount = true
+                }
+                const quantity = parseInt(quantityInput.value);
+                let costPerFeature = 0;
+                featureSelect.forEach(feature => {
+                    const selectedOption = feature.options[feature.selectedIndex];
+                    costPerFeature += +selectedOption.dataset.price
+                })
+                console.log(`Quantity : ${quantity}`)
+                console.log(`cost : ${costPerFeature}`)
+                console.log(`pages : ${pageCount}`)
+                const totalCost = quantity * costPerFeature * pageCount;
+                orderCostDisplay.value = `$${totalCost.toFixed(2)}`;
+            }
+
+            // ---- EventListeners ----
+            // Event listener for changes in quantity or feature for existing items
+            orderDetailsContainer.addEventListener('input', function(event) {
+                // Cost calculation for quantity/feature changes
+                if (event.target.classList.contains('quantity-input') || event.target.classList.contains('feature-select')) {
+                    const itemElement = event.target.closest('.order-detail-item');
+                    updateOrderCost(itemElement);
+                }
+
+                // File upload event
+                if (event.target.classList.contains('order-file-input')) {
+                    const fileInput = event.target;
+                    const itemId = fileInput.closest('.order-detail-item');
+                    const statusElement = itemId.querySelector(`.file-status`);
+                    const urlInput = itemId.querySelector(".file-url")
+                    uploadFileToR2(fileInput, urlInput, statusElement);
+                }
+                });
+
+            // Function to duplicate the order detail fields
+            addOrderDetailButton.addEventListener('click', function() {
+                orderDetailCount++;
+                const originalItem = document.getElementById('orderDetailItem'); // Clone the first item
+                const newItem = originalItem.cloneNode(true); // true for deep clone (all children)
+
+                // Update IDs and names for the new fields to be unique
+                newItem.className = `order-detail-item`;
+                newItem.querySelector('.order-file-input').value = ""
+                newItem.querySelector('.file-url').value = ""
+                newItem.querySelector('.quantity-input').value = 1; // Reset quantity
+                newItem.querySelectorAll("select").forEach(selectElement => {
+                    selectElement.selectedIndex = 0
+                }) // Reset feature selection
+
+                newItem.querySelector('.order-cost-display').value = "0.00"; // Reset cost
+
+                // Add a remove button for the new duplicated items
+                const removeButtonHtml = `
+                    <div class="col-md2 text-end mt-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button>
+                    </div>
+                `;
+                newItem.querySelector('.row.g-3').insertAdjacentHTML('beforeend', removeButtonHtml);
+
+                newItem.insertAdjacentHTML("afterbegin", '<hr class="my-4">');
+                orderDetailsContainer.appendChild(newItem);
+
+                // Re-calculate cost for the newly added item (which will be $0.00 initially)
+                updateOrderCost(newItem);
+            });
+
+            // Event listener for removing order detail items
+            orderDetailsContainer.addEventListener('click', function(event) {
+                if (event.target.classList.contains('remove-item-btn')) {
+                    const itemToRemove = event.target.closest('.order-detail-item');
+                    itemToRemove.remove();
+                }
+            });
+
+            // Function to submit 
+            orderForm.addEventListener("submit", async (e) => {
+                e.preventDefault()
+
+                const sessionID = localStorage.getItem("session") || 
+
+                // Make spinning loading
+                showLoadingSpinner()
+
+                // Build JSON
+                const formData = []
+                const rows = document.querySelectorAll(".order-detail-item .row")
+                rows.forEach(row => {
+                    const fileUrl = row.querySelector(".file-url")
+                    const quantity = row.querySelector(".quantity-input")
+                    const features = [...row.querySelectorAll(".feature-select")]
+                    formData.push({
+                        "file_url" : fileUrl.value,
+                        "quantity" : quantity.value,
+                        "features" : features.map(e => e.value)
+                    })
+                })
+
+                
+                // Send Request for backend
+                await fetch("{% url 'create-order' %}",{
+                    method : "POST",
+                    body : JSON.stringify({
+                        "orders" : formData,
+                        "client" : document.getElementById("clientName").value,
+                        "session" : getClientSessionId(),
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                })
+                .then(response => response.json().then(data => ({"message" : data.message, "status": response.status})))
+                .then(result => {
+                    if (result.status == 200){
+                        classList = "success"
+                    } else {
+                        classList = "danger"
+                    }
+                    showAlert(result.message, classList)
+                    setTimeout(() => {
+                        window.location.href = "{% url 'home' %}"
+                    })
+                })
+                hideLoadingSpinner()
+                return false
+            })
+            // ---- End EventListeners ----
+
+        });
+    </script>
+{% endblock %}
