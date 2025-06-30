@@ -74,6 +74,7 @@ def create_order(request):
             features_ids = order_data['features']
             quantity = order_data['quantity']
             file = order_data['file_url']
+            note = order_data['note']
             features = []
 
             for feature_id in features_ids:
@@ -89,7 +90,8 @@ def create_order(request):
                 document=file,
                 quantity=quantity,
                 cost=round(cost, 2),
-                order_id=order
+                order_id=order,
+                note=note
             )
             details.append(order_detail)
             details_features.extend([
@@ -220,12 +222,13 @@ def get_next_orders(request):
 # Report Page
 def report_dashboard(request):
     # GET
+    # ['accepted', 'finished', 'declined', 'pending', 'processing']
     if request.method == "GET":
         tables = [
             {
                 "state" : state,
             }
-            for state in ['accepted', 'finished', 'declined', 'pending', 'processing']
+            for state in ['finished', 'declined', 'processing']
         
         ]
             

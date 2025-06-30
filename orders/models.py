@@ -45,7 +45,8 @@ class Order(models.Model):
                 "file_url" : presigned_get,
                 "quantity" : detail.quantity,
                 "cost" : detail.cost,
-                "features" : features
+                "features" : features,
+                "note" : detail.note,
             })
         return details
     
@@ -63,8 +64,8 @@ class OrderDetail(models.Model):
     quantity = models.IntegerField(default=1)
     cost = models.FloatField()
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="details")
+    note = models.TextField(null=True)
 
-    # TODO : modify save for creation to have default values for each feature inside it
 
 class OrderFeatureDetail(models.Model):
     order_detail_id = models.ForeignKey(OrderDetail, on_delete=models.CASCADE, related_name="features")

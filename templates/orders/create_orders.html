@@ -80,10 +80,18 @@
                                 </select>
                             </div>
                         {% endfor %}
+                        <div class="mb-2">
+                            <label for="messageTextarea" class="form-label">Notes</label>
+                            <textarea 
+                                class="form-control note" 
+                                id="messageTextarea" 
+                                rows="5" 
+                                placeholder="If there is any notes to be considered write here..."
+                                style="resize: vertical; min-height: 120px;"></textarea>
+                        </div>
                         <div class="col-md2">
                             <label for="orderCost" class="form-label">Order Cost <span class="text-muted">this is just estimation, and may not be accurate</span></label>
                             <input type="text" class="form-control order-cost-display" id="orderCost" name="orderCost" value="$0.00" readonly>
-
                         </div>
                     </div>
                 </div>
@@ -371,6 +379,7 @@
                 newItem.className = `order-detail-item`;
                 newItem.querySelector('.order-file-input').value = ""
                 newItem.querySelector('.file-url').value = ""
+                newItem.querySelector('.note').value = ""
                 newItem.querySelector('.quantity-input').value = 1; // Reset quantity
                 newItem.querySelectorAll("select").forEach(selectElement => {
                     selectElement.selectedIndex = 0
@@ -386,7 +395,7 @@
                 `;
                 newItem.querySelector('.row.g-3').insertAdjacentHTML('beforeend', removeButtonHtml);
 
-                newItem.insertAdjacentHTML("afterbegin", '<hr class="my-4">');
+                
                 orderDetailsContainer.appendChild(newItem);
 
                 // Re-calculate cost for the newly added item (which will be $0.00 initially)
@@ -417,9 +426,11 @@
                     const fileUrl = row.querySelector(".file-url")
                     const quantity = row.querySelector(".quantity-input")
                     const features = [...row.querySelectorAll(".feature-select")]
+                    const note = row.querySelector(".note")
                     formData.push({
                         "file_url" : fileUrl.value,
                         "quantity" : quantity.value,
+                        "note" : note.value,
                         "features" : features.map(e => e.value)
                     })
                 })
