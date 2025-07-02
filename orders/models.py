@@ -54,6 +54,7 @@ class Order(models.Model):
         return {
             "id" : self.pk,
             "client" : self.client,
+            "status" : self.status,
             "total_cost" : self.total_cost,
             "created_at" : self.created_at,
             "details" : self.build_details(),

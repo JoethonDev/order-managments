@@ -219,6 +219,22 @@ def get_next_orders(request):
     else:
         return HttpResponseNotAllowed(['DELETE', "PUT", "PATCH"])
 
+
+# Get Order by Id
+@csrf_exempt
+def get_order(request, order_id):
+    if request.method == "POST":
+        try:
+            order = Order.objects.get(pk=order_id)
+            return JsonResponse({
+                "message" : "Order is successfully retrieved!",
+                "order" : order.serialize()
+            }) 
+        except:
+            return HttpResponseNotFound("Order is not found!")
+    return HttpResponseNotAllowed(["GET", "PUT", "DELETE"])
+
+
 # Report Page
 def report_dashboard(request):
     # GET
