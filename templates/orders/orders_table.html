@@ -1,23 +1,25 @@
+{% load i18n %}
+
 <h3 class="section-title">
-    <i class="bi bi-check-circle me-2"></i>{{ state }} Orders
+    <i class="bi bi-check-circle me-2"></i>{% translate state|capfirst %} {% translate "Orders" %}
 </h3>
 <div class="row filters-row align-items-end">
     <div class="col-md-3">
-        <label class="form-label fw-semibold">From Date</label>
+        <label class="form-label fw-semibold">{% translate "From Date" %}</label>
         <input type="date" class="form-control" id="{{ state }}-from-date" value="{{ from }}" name="from">
     </div>
     <div class="col-md-3">
-        <label class="form-label fw-semibold">To Date</label>
+        <label class="form-label fw-semibold">{% translate "To Date" %}</label>
         <input type="date" class="form-control" id="{{ state }}-to-date" value="{{ to }}" name="to">
     </div>
     <div class="col-md-3">
-        <label class="form-label fw-semibold">Search</label>
-        <input type="text" class="form-control" placeholder="Search orders..." id="{{ state }}-search" name="query" value="{{ query }}">
+        <label class="form-label fw-semibold">{% translate "Search" %}</label>
+        <input type="text" class="form-control" placeholder="{% translate "Search orders..." %}" id="{{ state }}-search" name="query" value="{{ query }}">
     </div>
     <div class="col-md-2">
-        <label class="form-label fw-semibold">Worker</label>
+        <label class="form-label fw-semibold">{% translate "Worker" %}</label>
         <select class="form-select" id="{{ state }}-worker">
-            <option value="">All Workers</option>
+            <option value="">{% translate "All Workers" %}</option>
             {% for worker in workers %}
                 <option value="{{ worker.pk }}" 
                 {% if by == worker.pk %}
@@ -39,11 +41,11 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>Order ID</th>
-                <th>Client</th>
-                <th>Total Cost</th>
-                <th>Created Date</th>
-                <th>Status</th>
+                <th>{% translate "Order ID" %}</th>
+                <th>{% translate "Client" %}</th>
+                <th>{% translate "Total Cost" %}</th>
+                <th>{% translate "Created Date" %}</th>
+                <th>{% translate "Status" %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -54,7 +56,7 @@
                     <td>{{ order.client }}</td>
                     <td>{{ order.total_cost }}</td>
                     <td>{{ order.created_at|date:"Y-m-d H:i:s"  }}</td>
-                    <td><span class="badge {{ state_class }} badge-status">{{ state|capfirst  }}</span></td>
+                    <td><span class="badge {{ state_class }} badge-status">{% translate state|capfirst %}</span></td>
                     <td class="text-end">
                         <i class="bi bi-chevron-down toggle-icon"></i>
                     </td>
@@ -63,22 +65,22 @@
                     <td colspan="6">
                         <div class="details-content">
                             <h6 class="text-primary mb-3">
-                                <i class="bi bi-list-ul me-2"></i>Order Details
+                                <i class="bi bi-list-ul me-2"></i>{% translate "Order Details" %}
                             </h6>
                             {% for detail in order.details %}
                                 <div class="detail-item">
                                     <div class="row align-items-center">
                                         <div class="col-md-3">
-                                            <strong>File:</strong> {{ detail.file_name }}
+                                            <strong>{% translate "File" %}:</strong> {{ detail.file_name }}
                                         </div>
                                         <div class="col-md-2">
-                                            <strong>Quantity:</strong> {{ detail.quantity }}
+                                            <strong>{% translate "Quantity" %}:</strong> {{ detail.quantity }}
                                         </div>
                                         <div class="col-md-2">
-                                            <strong>Cost:</strong> {{ detail.cost }}
+                                            <strong>{% translate "Cost" %}:</strong> {{ detail.cost }}
                                         </div>
                                         <div class="col-md-3">
-                                            <strong>Features:</strong><br>
+                                            <strong>{% translate "Features" %}:</strong><br>
                                             {% for feature in detail.features %}
                                                 <span class="badge bg-light text-dark me-1">{{ feature }}</span>
                                             {% endfor %}
@@ -86,11 +88,11 @@
                                         <div class="col-md-2 text-end">
                                             {% if detail.file_url %}
                                                 <a href="{{ detail.file_url }}" class="btn btn-success btn-sm file-button" target="_blank">
-                                                    <i class="bi bi-download me-1"></i>Download
+                                                    <i class="bi bi-download me-1"></i>{% translate "Download" %}
                                                 </a>
                                             {% else %}
                                                 <button class="btn btn-secondary btn-sm file-button" disabled>
-                                                    <i class="bi bi-trash me-1"></i>File Deleted
+                                                    <i class="bi bi-trash me-1"></i>{% translate "File Deleted" %}
                                                 </button>
                                             {% endif %}
                                         </div>
@@ -114,14 +116,14 @@
                         <li class="page-item">
                             <a class="page-link" 
                             href="{{ previous_url }}">
-                                <i class="bi bi-chevron-left me-1"></i>Previous
+                                <i class="bi bi-chevron-left me-1"></i>{% translate "Previous" %}
                             </a>
                         </li>
                     {% endif %}
                     
                     <li class="page-item active">
                         <span class="page-link">
-                            Page {{ number }} of {{ num_pages }}
+                            {% translate "Page" %} {{ number }} {% translate "of" %} {{ num_pages }}
                         </span>
                     </li>
                     
@@ -129,7 +131,7 @@
                         <li class="page-item">
                             <a class="page-link" 
                             href="{{ next_url }}">
-                                Next<i class="bi bi-chevron-right ms-1"></i>
+                                {% translate "Next" %}<i class="bi bi-chevron-right ms-1"></i>
                             </a>
                         </li>
                     {% endif %}

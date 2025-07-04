@@ -1,4 +1,5 @@
 {% extends "orders/base.html" %}
+{% load i18n %}
 
 {% block style %}
     <style>
@@ -168,15 +169,15 @@
                 <div class="text-center mb-4">
                     <button id="getNextBtn" class="btn btn-get-next">
                         <i class="bi bi-arrow-clockwise me-2"></i>
-                        Get Next Order
+                        {% translate "Get Next Order" %}
                     </button>
                 </div>
 
                 <div id="orderContainer">
                     <div class="no-orders">
                         <i class="bi bi-inbox" style="font-size: 3rem; color: #dee2e6;"></i>
-                        <h4 class="mt-3">No Order Selected</h4>
-                        <p>Click "Get Next Order" to retrieve a new order</p>
+                        <h4 class="mt-3">{% translate "No Order Selected" %}</h4>
+                        <p>{% translate "Click \"Get Next Order\" to retrieve a new order" %}</p>
                     </div>
                 </div>
             </div>
@@ -187,27 +188,27 @@
                     <div class="accepted-orders-header">
                         <h5 class="mb-0">
                             <i class="bi bi-check-circle me-2"></i>
-                            Accepted Orders
+                            {% translate "Accepted Orders" %}
                         </h5>
                     </div>
                     <div id="acceptedOrdersList">
                         {% for order in accepted_orders %}
                             <div class="accepted-order-item">
-                                <div class="d-flex justify-content-between align-items-center" data-id="{{ order.id }}">
+                                <div class="d-flex justify-content-between align-items-center" data-id="{{ order.id }}" onclick="getOrderByID({{ order.id }})">
                                     <div>
                                         <h6 class="mb-1 accepted-client">{{ order.client }}</h6>
                                         <small class="text-muted accepted-cost">$ {{ order.total_cost }}</small>
                                     </div>
                                     <button class="btn btn-sm btn-finish" onclick="updateOrderStatus('finished', {{ order.id }})">
                                         <i class="bi bi-check-lg"></i>
-                                        Finish
+                                        {% translate "Finish" %}
                                     </button>
                                 </div>
                             </div>
                         {% empty %}
                             <div class="no-orders">
                                 <i class="bi bi-clipboard-check" style="font-size: 2rem; color: #dee2e6;"></i>
-                                <p class="mt-2">No accepted orders</p>
+                                <p class="mt-2">{% translate "No accepted orders" %}</p>
                             </div>
                         {% endfor %}
                     </div>
@@ -219,7 +220,79 @@
     <script>
         // Configuration - Replace with your actual URLs
         const GET_ORDER_URL = '{% url "order-dashboard" %}';  // Placeholder URL
-        const UPDATE_ORDER_URL = '{% url "change-order" %}';  // Placeholder URL
+        const UPDATE_ORDER_URL = '{% url "change-order" %}'; 
+        const GET_ORDER_ID = window.location.pathname.split("/").slice(0,3).join("/") // Placeholder URL
+
+        // Translations for JavaScript messages
+        const translations = {
+            'en': {
+                'loading': 'Loading...',
+                'noOrderSelected': 'No Order Selected',
+                'clickGetNextOrder': 'Click "Get Next Order" to retrieve a new order',
+                'errorLoadingOrder': 'Error Loading Order',
+                'tryAgainLater': 'Please try again later',
+                'acceptOrder': 'Accept Order',
+                'declineOrder': 'Decline Order',
+                'finishOrder': 'Finish Order',
+                'orderDetails': 'Order Details',
+                'file': 'File',
+                'quantity': 'Quantity',
+                'cost': 'Cost',
+                'features': 'Features',
+                'notes': 'Notes',
+                'download': 'Download',
+                'fileDeleted': 'File Deleted',
+                'totalCost': 'Total Cost',
+                'noAcceptedOrders': 'No accepted orders',
+                'orderAccepted': 'Order accepted successfully!',
+                'orderDeclined': 'Order declined successfully!',
+                'orderFinished': 'Order finished successfully!',
+                'success': 'Success',
+                'error': 'Error',
+                'orderStatusUpdated': 'Order status updated successfully!',
+                'errorUpdatingOrder': 'Error updating order:',
+                'noOrdersFound': 'No Orders Found',
+                'noOrdersToDisplay': 'There are no orders to display at the moment.'
+            },
+            'ar': {
+                'loading': 'جاري التحميل...',
+                'noOrderSelected': 'لم يتم اختيار طلب',
+                'clickGetNextOrder': 'انقر على "الحصول على الطلب التالي" لاسترداد طلب جديد',
+                'errorLoadingOrder': 'خطأ في تحميل الطلب',
+                'tryAgainLater': 'الرجاء المحاولة مرة أخرى لاحقًا',
+                'acceptOrder': 'قبول الطلب',
+                'declineOrder': 'رفض الطلب',
+                'finishOrder': 'إنهاء الطلب',
+                'orderDetails': 'تفاصيل الطلب',
+                'file': 'ملف',
+                'quantity': 'الكمية',
+                'cost': 'التكلفة',
+                'features': 'الميزات',
+                'notes': 'ملاحظات',
+                'download': 'تنزيل',
+                'fileDeleted': 'تم حذف الملف',
+                'totalCost': 'التكلفة الإجمالية',
+                'noAcceptedOrders': 'لا توجد طلبات مقبولة',
+                'orderAccepted': 'تم قبول الطلب بنجاح!',
+                'orderDeclined': 'تم رفض الطلب بنجاح!',
+                'orderFinished': 'تم إنهاء الطلب بنجاح!',
+                'success': 'نجاح',
+                'error': 'خطأ',
+                'orderStatusUpdated': 'تم تحديث حالة الطلب بنجاح!',
+                'errorUpdatingOrder': 'خطأ في تحديث الطلب:',
+                'noOrdersFound': 'لا توجد طلبات',
+                'noOrdersToDisplay': 'لا توجد طلبات لعرضها في الوقت الحالي.'
+            }
+        };
+
+        function getTranslation(key, params = {}) {
+            const lang = document.documentElement.lang || 'en';
+            let message = translations[lang][key] || translations['en'][key];
+            for (const param in params) {
+                message = message.replace(`{${param}}`, params[param]);
+            }
+            return message;
+        }
 
         let currentOrder = null;
         let acceptedOrders = [];
@@ -242,12 +315,30 @@
             await getNextOrder();
         });
 
+        async function getOrderByID(orderID) {
+            try {
+                // Replace with actual API call
+                const response = await fetch(`${GET_ORDER_ID}/${orderID}`, {method : "POST"});
+                const data = await response.json();
+                
+                if (data.order) {
+                    currentOrder = data.order;
+                    displayOrder(currentOrder);
+                } else {
+                    showNoOrdersMessage();
+                }
+            } catch (error) {
+                console.error('Error fetching order:', error);
+                showErrorMessage();
+            }
+        }
+
         async function getNextOrder() {
             const btn = document.getElementById('getNextBtn');
             const originalText = btn.innerHTML;
             
             // Show loading state
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${getTranslation('loading')}`;
             btn.disabled = true;
 
             try {
@@ -273,19 +364,49 @@
         function displayOrder(order) {
             const container = document.getElementById('orderContainer');
             
+            const state = order.status
+            let changeStatus = ""
+            if (state !== "accepted") {
+                changeStatus = `
+                    <div class="order-actions d-flex gap-2 mt-4">
+                        <button class="btn btn-accept flex-fill" onclick="updateOrderStatus('accepted', ${order.id})">
+                            <i class="bi bi-check-lg me-1"></i>
+                            ${getTranslation('acceptOrder')}
+                        </button>
+                        <button class="btn btn-decline flex-fill" onclick="updateOrderStatus('declined', ${order.id})">
+                            <i class="bi bi-x-lg me-1"></i>
+                            ${getTranslation('declineOrder')}
+                        </button>
+                        <button class="btn btn-finish flex-fill" onclick="updateOrderStatus('finished', ${order.id})">
+                            <i class="bi bi-flag-fill me-1"></i>
+                            ${getTranslation('finishOrder')}
+                        </button>
+                    </div>
+                `
+            } else {
+                changeStatus = `                
+                    <div class="order-actions d-flex gap-2 mt-4">
+                        <button class="btn btn-finish flex-fill" onclick="updateOrderStatus('finished', ${order.id})">
+                            <i class="bi bi-flag-fill me-1"></i>
+                            ${getTranslation('finishOrder')}
+                        </button>
+                    </div>
+                `
+            }
+
             let detailsHtml = '';
             order.details.forEach(detail => {
                 const featuresHtml = detail.features.map(feature => 
                     `<span class="feature-badge">${feature}</span>`
                 ).join('');
                 
-                notes = ''
+                let notes = ''
 
                 if (detail.note){
                     notes = `
                     <div class="row mt-2">
                         <div class="col-md-6">
-                            <small class="text-muted">Notes: <strong>${detail.note}</strong></small>
+                            <small class="text-muted">${getTranslation('notes')}: <strong>${detail.note}</strong></small>
                         </div>   
                     </div>
                     `
@@ -300,18 +421,19 @@
                             </h6>
                             <a href="${detail.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-download"></i>
+                                ${getTranslation('download')}
                             </a>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <small class="text-muted">Quantity: <strong>${detail.quantity}</strong></small>
+                                <small class="text-muted">${getTranslation('quantity')}: <strong>${detail.quantity}</strong></small>
                             </div>
                             <div class="col-md-6">
-                                <small class="text-muted">Cost: <strong>$${detail.cost}</strong></small>
+                                <small class="text-muted">${getTranslation('cost')}: <strong>$${detail.cost}</strong></small>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <small class="text-muted">Features:</small><br>
+                            <small class="text-muted">${getTranslation('features')}:</small><br>
                             ${featuresHtml}
                         </div>
                         ${notes}
@@ -335,28 +457,14 @@
                             </div>
                             <div class="text-end">
                                 <h3 class="mb-0">$${order.total_cost}</h3>
-                                <small class="opacity-75">Total Cost</small>
+                                <small class="opacity-75">${getTranslation('totalCost')}</small>
                             </div>
                         </div>
                     </div>
                     <div class="order-details">
-                        <h5 class="mb-3">Order Details</h5>
+                        <h5 class="mb-3">${getTranslation('orderDetails')}</h5>
                         ${detailsHtml}
-                        
-                        <div class="order-actions d-flex gap-2 mt-4">
-                            <button class="btn btn-accept flex-fill" onclick="updateOrderStatus('accepted', ${order.id})">
-                                <i class="bi bi-check-lg me-1"></i>
-                                Accept Order
-                            </button>
-                            <button class="btn btn-decline flex-fill" onclick="updateOrderStatus('declined', ${order.id})">
-                                <i class="bi bi-x-lg me-1"></i>
-                                Decline Order
-                            </button>
-                            <button class="btn btn-finish flex-fill" onclick="updateOrderStatus('finished', ${order.id})">
-                                <i class="bi bi-flag-fill me-1"></i>
-                                Finish Order
-                            </button>
-                        </div>
+                        ${changeStatus}
                     </div>
                 </div>
             `;
@@ -364,7 +472,6 @@
 
 
         async function updateOrderStatus(action, order_id=null) {
-            // console.log("Hello Status")
             if (!order_id) return;
 
             try {
@@ -382,24 +489,29 @@
                 if (response.ok) {
                     if (action === 'accepted') {
                         acceptedOrders.push(currentOrder);
+                        showSuccessMessage(getTranslation('orderAccepted'));
                     } 
+                    else if (action === 'declined') {
+                        showSuccessMessage(getTranslation('orderDeclined'));
+                    }
                     else if (action === 'finished') {
                         const orderIndex = acceptedOrders.findIndex(order =>  order.id == order_id)
                         if ( orderIndex !== -1 ){
                             acceptedOrders.splice(orderIndex, 1)
                         }
+                        showSuccessMessage(getTranslation('orderFinished'));
                     }
                     updateAcceptedOrdersList();
                     // Reset to initial state
                     currentOrder = null;
                     showNoOrdersMessage();
                     
-                    // Show success message
-                    showSuccessMessage(`Order ${action} successfully!`);
+                } else {
+                    showErrorMessage(getTranslation('errorUpdatingOrder'));
                 }
             } catch (error) {
                 console.error('Error updating order:', error);
-                showErrorMessage();
+                showErrorMessage(getTranslation('errorUpdatingOrder') + error.message);
             }
         }
 
@@ -410,7 +522,7 @@
                 list.innerHTML = `
                     <div class="no-orders">
                         <i class="bi bi-clipboard-check" style="font-size: 2rem; color: #dee2e6;"></i>
-                        <p class="mt-2">No accepted orders</p>
+                        <p class="mt-2">${getTranslation('noAcceptedOrders')}</p>
                     </div>
                 `;
                 return;
@@ -424,14 +536,14 @@
                 }
                 html += `
                     <div class="accepted-order-item">
-                        <div class="d-flex justify-content-between align-items-center" data-id="${order.id}">
+                        <div class="d-flex justify-content-between align-items-center" data-id="${order.id}" onclick="getOrderByID(${order.id})">
                             <div>
                                 <h6 class="mb-1 accepted-client">${order.client}</h6>
                                 <small class="text-muted accepted-cost">${costString}</small>
                             </div>
                             <button class="btn btn-sm btn-finish" onclick="updateOrderStatus('finished', ${order.id})">
                                 <i class="bi bi-check-lg"></i>
-                                Finish
+                                ${getTranslation('finishOrder')}
                             </button>
                         </div>
                     </div>
@@ -445,8 +557,8 @@
             document.getElementById('orderContainer').innerHTML = `
                 <div class="no-orders">
                     <i class="bi bi-inbox" style="font-size: 3rem; color: #dee2e6;"></i>
-                    <h4 class="mt-3">No Order Selected</h4>
-                    <p>Click "Get Next Order" to retrieve a new order</p>
+                    <h4 class="mt-3">${getTranslation('noOrderSelected')}</h4>
+                    <p>${getTranslation('clickGetNextOrder')}</p>
                 </div>
             `;
         }
@@ -455,8 +567,8 @@
             document.getElementById('orderContainer').innerHTML = `
                 <div class="no-orders">
                     <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #e74c3c;"></i>
-                    <h4 class="mt-3">Error Loading Order</h4>
-                    <p>Please try again later</p>
+                    <h4 class="mt-3">${getTranslation('errorLoadingOrder')}</h4>
+                    <p>${getTranslation('tryAgainLater')}</p>
                 </div>
             `;
         }
@@ -469,7 +581,7 @@
             toast.innerHTML = `
                 <div class="toast-header bg-success text-white">
                     <i class="bi bi-check-circle me-2"></i>
-                    <strong class="me-auto">Success</strong>
+                    <strong class="me-auto">${getTranslation('success')}</strong>
                 </div>
                 <div class="toast-body">
                     ${message}

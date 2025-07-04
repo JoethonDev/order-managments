@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
+from django.utils.translation import gettext as _ # Import gettext for runtime translation
 
 from orders.models import Category, Order, OrderDetail, Feature, OrderFeatureDetail
 from orders.utils import generate_download_url, get_r2_client
@@ -65,7 +66,7 @@ def create_order(request):
         
         
         if not (orders and client and session_id):
-            return HttpResponseBadRequest({"message" : "all fields must be filled in"})
+            return HttpResponseBadRequest(_("All fields must be filled in"))
         
         order = Order(client=client, session_id=session_id)
         details = []
@@ -81,7 +82,7 @@ def create_order(request):
                 try:
                     feature = Feature.objects.get(pk=feature_id)
                 except:
-                    return HttpResponseNotFound({"message" : "feature is not found!"})
+                    return HttpResponseNotFound(_("Feature is not found!"))
                 features.append(feature)
             
             # Features should be a list of corresponding features
@@ -113,7 +114,7 @@ def create_order(request):
         #     d.order_id = order.pk
         OrderFeatureDetail.objects.bulk_create(details_features)
 
-        return JsonResponse({"message" : "Order is placed successfully!"}, status=200)
+        return JsonResponse({"message" : _("Order is placed successfully!")}, status=200)
 
 
     elif request.method == "GET":
@@ -132,7 +133,7 @@ def get_presigned_url(request):
     file_type = request.POST.get('fileType') # e.g., 'image/jpeg', 'application/pdf'
 
     if not file_name or not file_type:
-        return JsonResponse({'error': 'fileName and fileType are required'}, status=400)
+        return JsonResponse({'error': _('fileName and fileType are required')}, status=400)
 
     # Generate a unique key for the file in R2
     # It's good practice to add a UUID to prevent collisions and make guessing harder
@@ -156,7 +157,7 @@ def get_presigned_url(request):
             "r2Key" : r2_key,
         })
     except Exception as e:
-        return JsonResponse({'error': f'Failed to generate presigned URL: {str(e)}'}, status=500)
+        return JsonResponse({'error': _('Failed to generate presigned URL: %s') % str(e)}, status=500)
 
 # Change Order Status
 @csrf_exempt
@@ -180,13 +181,13 @@ def change_order_status(request):
             order.status = status
             order.save()
 
-            print(order.status)
+            # print(order.status)
             return JsonResponse({
-                "message" : f"order is {status} successfully"
+                "message" : _("Order is %s successfully") % status
             }, status=200)
     
         return JsonResponse({
-            "message" : f"Bad request, status is not allowed!"
+            "message" : _("Bad request, status is not allowed!")
         }, status=400)
     
     return HttpResponseNotAllowed(['DELETE', 'GET', 'PATCH', 'PUT'])
@@ -197,7 +198,7 @@ def change_order_status(request):
 def get_next_orders(request):
     # Ensure Authenticated
     if not request.user.is_authenticated:
-        return HttpResponseForbidden("You are not authorized to login")
+        return HttpResponseForbidden(_("You are not authorized to login"))
     # GET Request => Render Page
     if request.method == "GET":
         accepted_orders = Order.objects.filter(status="accepted", worker_id=request.user)
@@ -210,11 +211,11 @@ def get_next_orders(request):
         if next_order:
            
             return JsonResponse({
-                "message" : "Order is successfully retrieved!",
+                "message" : _("Order is successfully retrieved!"),
                 "order" : next_order.serialize()
             }) 
 
-        return JsonResponse({"message" : "There is not any orders for processing"}, status=200)
+        return JsonResponse({"message" : _("There are no orders for processing")}, status=200)
 
     else:
         return HttpResponseNotAllowed(['DELETE', "PUT", "PATCH"])
@@ -227,7 +228,7 @@ def get_order(request, order_id):
         try:
             order = Order.objects.get(pk=order_id)
             return JsonResponse({
-                "message" : "Order is successfully retrieved!",
+                "message" : _("Order is successfully retrieved!"),
                 "order" : order.serialize()
             }) 
         except:
@@ -261,7 +262,7 @@ def order_table(request, state):
         return HttpResponseForbidden("Not authorized!")
     if request.method == "GET":
         if state not in  ['accepted', 'declined', 'pending', 'processing', "finished"]:
-            return HttpResponseBadRequest("Invalid state for orders!")
+            return HttpResponseBadRequest(_("Invalid state for orders!"))
 
         CLASSES = {
             'accepted' : 'bg-primary',

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _ # Import gettext_lazy
 
 from orders.utils import generate_download_url
 
@@ -15,12 +16,12 @@ class Feature(models.Model):
 
 class Order(models.Model):
     STATUS = [
-        ("pending", "Pending"),
-        ("processing", "Processing"),
-        ("cancelled", "Cancelled"),
-        ("accepted", "Accepted"),
-        ("finished", "Finished"),
-        ("declined", "Declined")
+        ("pending", _("Pending")),
+        ("processing", _("Processing")),
+        ("cancelled", _("Cancelled")),
+        ("accepted", _("Accepted")),
+        ("finished", _("Finished")),
+        ("declined", _("Declined"))
     ]
 
     client = models.CharField(max_length=50)

@@ -1,4 +1,5 @@
 {% extends 'orders/base.html' %}
+{% load i18n %}
 
 {% block style %}
 <style>
@@ -338,9 +339,9 @@
         <!-- Dashboard Header -->
         <div class="dashboard-header">
             <h1 class="dashboard-title">
-                <i class="bi bi-printer me-2"></i>PrinterHub Dashboard
+                <i class="bi bi-printer me-2"></i>{% translate "PrinterHub Dashboard" %}
             </h1>
-            <p class="dashboard-subtitle">Manage and track your printing orders</p>
+            <p class="dashboard-subtitle">{% translate "Manage and track your printing orders" %}</p>
         </div>
 
 
@@ -351,8 +352,8 @@
                     <div class="section-icon processing-icon">
                         <i class="bi bi-gear-fill"></i>
                     </div>
-                    <h2 class="section-title">Processing Orders</h2>
-                    <span class="section-count">{{ processing_orders|length }} Active</span>
+                    <h2 class="section-title">{% translate "Processing Orders" %}</h2>
+                    <span class="section-count">{{ processing_orders|length }} {% translate "Active" %}</span>
                 </div>
                 
                 <div class="table-container">
@@ -361,10 +362,10 @@
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Order ID</th>
-                                    <th scope="col">Client</th>
-                                    <th scope="col">Created Time</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">{% translate "Order ID" %}</th>
+                                    <th scope="col">{% translate "Client" %}</th>
+                                    <th scope="col">{% translate "Created Time" %}</th>
+                                    <th scope="col">{% translate "Status" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -376,7 +377,7 @@
                                         <td class="created-time">{{ order.created_at|date:"Y-m-d H:i:s" }}</td>
                                         <td>
                                             <span class="badge bg-warning text-dark">
-                                                <i class="bi bi-clock me-1"></i>Processing
+                                                <i class="bi bi-clock me-1"></i>{% translate "Processing" %}
                                             </span>
                                         </td>
                                     </tr>
@@ -385,8 +386,8 @@
                                     <tr>
                                         <td colspan="5" class="empty-state">
                                             <i class="bi bi-inbox"></i>
-                                            <h3>No Orders Found</h3>
-                                            <p>There are no orders to display at the moment.</p>
+                                            <h3>{% translate "No Orders Found" %}</h3>
+                                            <p>{% translate "There are no orders to display at the moment." %}</p>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -403,8 +404,8 @@
                     <div class="section-icon orders-icon">
                         <i class="bi bi-list-ul"></i>
                     </div>
-                    <h2 class="section-title">All Orders</h2>
-                    <span class="section-count">{{ pending_orders|length }} Total</span>
+                    <h2 class="section-title">{% translate "All Orders" %}</h2>
+                    <span class="section-count">{{ pending_orders|length }} {% translate "Total" %}</span>
                 </div>
                 
                 <div class="table-container">
@@ -413,10 +414,10 @@
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Order ID</th>
-                                    <th scope="col">Client</th>
-                                    <th scope="col">Created Time</th>
-                                    <th scope="col">Action</th>
+                                    <th scope="col">{% translate "Order ID" %}</th>
+                                    <th scope="col">{% translate "Client" %}</th>
+                                    <th scope="col">{% translate "Created Time" %}</th>
+                                    <th scope="col">{% translate "Action" %}</th>
                                 </tr>
                             </thead>
                             <tbody id="pending-orders">
@@ -431,8 +432,8 @@
                                     <tr>
                                         <td colspan="5" class="empty-state">
                                             <i class="bi bi-inbox"></i>
-                                            <h3>No Orders Found</h3>
-                                            <p>There are no orders to display at the moment.</p>
+                                            <h3>{% translate "No Orders Found" %}</h3>
+                                            <p>{% translate "There are no orders to display at the moment." %}</p>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -446,6 +447,35 @@
     </div>
 
     <script>
+        // Translations for JavaScript messages
+        const translations = {
+            'en': {
+                'success': 'success',
+                'danger': 'danger',
+                'orderCancelled': 'Order cancelled successfully!',
+                'errorCancelling': 'Error cancelling order:',
+                'noOrdersFound': 'No Orders Found',
+                'noOrdersDisplay': 'There are no orders to display at the moment.'
+            },
+            'ar': {
+                'success': 'success',
+                'danger': 'danger',
+                'orderCancelled': 'تم إلغاء الطلب بنجاح!',
+                'errorCancelling': 'خطأ في إلغاء الطلب:',
+                'noOrdersFound': 'لا توجد طلبات',
+                'noOrdersDisplay': 'لا توجد طلبات لعرضها في الوقت الحالي.'
+            }
+        };
+
+        function getTranslation(key, params = {}) {
+            const lang = document.documentElement.lang || 'en';
+            let message = translations[lang][key] || translations['en'][key];
+            for (const param in params) {
+                message = message.replace(`{${param}}`, params[param]);
+            }
+            return message;
+        }
+
         // Function to display alert
         function showAlert(message, type, duration = 3000) {
             // Remove any existing alerts to avoid stacking too many
@@ -482,7 +512,7 @@
                 const firstCol = row.firstElementChild
                 console.log(firstCol)
                 if (firstCol.dataset.session == sessionID) {
-                    row.insertAdjacentHTML("beforeend", "<td><div class='cancel-button'>×</div></td>")
+                    row.insertAdjacentHTML("beforeend", "<td><div class='cancel-button'>&times;</div></td>")
                 }
             })
 
@@ -502,16 +532,17 @@
                     })
                     .then(response => response.json().then(data => ({"message": data.message, "status": response.status})))
                     .then(result => {
+                        let className;
                         if (result.status == 200) {
-                            className = "success"
+                            className = getTranslation('success');
                         }
                         else {
-                            className = "danger"
+                            className = getTranslation('danger');
                         }
-                        showAlert(result.message, className)
+                        showAlert(result.message, className);
                     })
                     .catch(error => {
-                        showAlert(error, "danger")
+                        showAlert(`${getTranslation('errorCancelling')} ${error}`, getTranslation('danger'));
                     })
                 })
             })

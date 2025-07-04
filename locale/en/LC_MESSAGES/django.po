@@ -1,0 +1,245 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-02 08:21+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: .\templates\orders\base.html:53
+msgid "Home"
+msgstr ""
+
+#: .\templates\orders\base.html:54
+msgid "Create Order"
+msgstr ""
+
+#: .\templates\orders\base.html:56
+msgid "Login"
+msgstr ""
+
+#: .\templates\orders\base.html:58 .\templates\orders\orders_table.html:4
+msgid "Orders"
+msgstr ""
+
+#: .\templates\orders\base.html:59
+msgid "Reports"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:45
+msgid "Client Order Form"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:50
+msgid "Client Name"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:56
+#: .\templates\orders\orders_table.html:68
+msgid "Order Details"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:61
+#: .\templates\orders\orders_table.html:74
+msgid "File"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:63
+msgid "No file selected."
+msgstr ""
+
+#: .\templates\orders\create_orders.html:67
+#: .\templates\orders\orders_table.html:77
+msgid "Quantity"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:85
+msgid "Notes"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:90
+msgid "If there is any notes to be considered write here..."
+msgstr ""
+
+#: .\templates\orders\create_orders.html:94
+msgid "Order Cost"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:94
+msgid "this is just estimation, and may not be accurate"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:101
+msgid "Add Another File"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:104
+msgid "Submit Order"
+msgstr ""
+
+#: .\templates\orders\create_orders.html:107
+msgid "Loading..."
+msgstr ""
+
+#: .\templates\orders\index.html:342
+msgid "PrinterHub Dashboard"
+msgstr ""
+
+#: .\templates\orders\index.html:344
+msgid "Manage and track your printing orders"
+msgstr ""
+
+#: .\templates\orders\index.html:355
+msgid "Processing Orders"
+msgstr ""
+
+#: .\templates\orders\index.html:356
+msgid "Active"
+msgstr ""
+
+#: .\templates\orders\index.html:365 .\templates\orders\index.html:417
+#: .\templates\orders\orders_table.html:44
+msgid "Order ID"
+msgstr ""
+
+#: .\templates\orders\index.html:366 .\templates\orders\index.html:418
+#: .\templates\orders\orders_table.html:45
+msgid "Client"
+msgstr ""
+
+#: .\templates\orders\index.html:367 .\templates\orders\index.html:419
+msgid "Created Time"
+msgstr ""
+
+#: .\templates\orders\index.html:368 .\templates\orders\orders_table.html:48
+msgid "Status"
+msgstr ""
+
+#: .\templates\orders\index.html:380
+msgid "Processing"
+msgstr ""
+
+#: .\templates\orders\index.html:389 .\templates\orders\index.html:435
+msgid "No Orders Found"
+msgstr ""
+
+#: .\templates\orders\index.html:390 .\templates\orders\index.html:436
+msgid "There are no orders to display at the moment."
+msgstr ""
+
+#: .\templates\orders\index.html:407
+msgid "All Orders"
+msgstr ""
+
+#: .\templates\orders\index.html:408
+msgid "Total"
+msgstr ""
+
+#: .\templates\orders\index.html:420
+msgid "Action"
+msgstr ""
+
+#: .\templates\orders\orders_dashboard.html:172
+msgid "Get Next Order"
+msgstr ""
+
+#: .\templates\orders\orders_dashboard.html:179
+msgid "No Order Selected"
+msgstr ""
+
+#: .\templates\orders\orders_dashboard.html:180
+msgid "Click \\"
+msgstr ""
+
+#: .\templates\orders\orders_dashboard.html:191
+msgid "Accepted Orders"
+msgstr ""
+
+#: .\templates\orders\orders_dashboard.html:204
+msgid "Finish"
+msgstr ""
+
+#: .\templates\orders\orders_dashboard.html:211
+msgid "No accepted orders"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:8
+msgid "From Date"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:12
+msgid "To Date"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:16
+msgid "Search"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:17
+msgid "Search orders..."
+msgstr ""
+
+#: .\templates\orders\orders_table.html:20
+msgid "Worker"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:22
+msgid "All Workers"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:46
+msgid "Total Cost"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:47
+msgid "Created Date"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:80
+msgid "Cost"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:83
+msgid "Features"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:91
+msgid "Download"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:95
+msgid "File Deleted"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:119
+msgid "Previous"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:126
+msgid "Page"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:126
+msgid "of"
+msgstr ""
+
+#: .\templates\orders\orders_table.html:134
+msgid "Next"
+msgstr ""
+
+#: .\templates\orders\report_dashboard.html:205
+msgid "Orders Dashboard"
+msgstr ""
