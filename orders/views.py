@@ -320,6 +320,7 @@ def order_table(request, state):
         prev_url = f"{base_url}?{query_params.urlencode()}" if has_previous else None
 
         orders = [order.serialize() for order in current_page.object_list]
+        total_cost = round(sum([order['total_cost'] for order in orders]), 2)
 
         return render(request, "orders/orders_table.html", {
             "base_url" : base_url,
@@ -328,6 +329,7 @@ def order_table(request, state):
             "previous_url" : prev_url,
             "state" : state,
             "state_title" : _(state.capitalize()),
+            "total_cost" : total_cost,
             "orders" : [order.serialize() for order in current_page.object_list],
             "num_pages" : current_page.paginator.num_pages,
             "has_previous" : has_previous,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-02 08:21+0300\n"
+"POT-Creation-Date: 2025-07-10 16:37+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,23 +19,95 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: .\templates\orders\base.html:53
+#: .\orders\models.py:19
+msgid "Pending"
+msgstr "معلق"
+
+#: .\orders\models.py:20 .\templates\orders\index.html:380
+msgid "Processing"
+msgstr "قيد المعالجة"
+
+#: .\orders\models.py:21
+msgid "Cancelled"
+msgstr "ملغاة"
+
+#: .\orders\models.py:22
+msgid "Accepted"
+msgstr "الطلبات المقبولة"
+
+#: .\orders\models.py:23
+msgid "Finished"
+msgstr "منتهية"
+
+#: .\orders\models.py:24
+msgid "Declined"
+msgstr "مرفوضة"
+
+#: .\orders\views.py:69
+msgid "All fields must be filled in"
+msgstr "يجب ملء جميع الحقول"
+
+#: .\orders\views.py:85
+msgid "Feature is not found!"
+msgstr "الميزة غير موجودة!"
+
+#: .\orders\views.py:117
+msgid "Order is placed successfully!"
+msgstr "تم تقديم الطلب بنجاح!"
+
+#: .\orders\views.py:136
+msgid "fileName and fileType are required"
+msgstr "اسم الملف ونوع الملف مطلوبان"
+
+#: .\orders\views.py:160
+#, python-format
+msgid "Failed to generate presigned URL: %s"
+msgstr "فشل في إنشاء عنوان URL موقع مسبقًا: %s"
+
+#: .\orders\views.py:186
+#, python-format
+msgid "Order is %s successfully"
+msgstr "تم %s الطلب بنجاح"
+
+#: .\orders\views.py:190
+msgid "Bad request, status is not allowed!"
+msgstr "طلب سيء، الحالة غير مسموح بها!"
+
+#: .\orders\views.py:201
+msgid "You are not authorized to login"
+msgstr "غير مصرح لك بتسجيل الدخول"
+
+#: .\orders\views.py:214 .\orders\views.py:231
+msgid "Order is successfully retrieved!"
+msgstr "تم استرداد الطلب بنجاح!"
+
+#: .\orders\views.py:218
+#, fuzzy
+#| msgid "There are no orders to display at the moment."
+msgid "There are no orders for processing"
+msgstr "لا توجد طلبات لعرضها في الوقت الحالي."
+
+#: .\orders\views.py:265
+msgid "Invalid state for orders!"
+msgstr "حالة غير صالحة للطلبات!"
+
+#: .\templates\orders\base.html:55
 msgid "Home"
 msgstr "الرئيسية"
 
-#: .\templates\orders\base.html:54
+#: .\templates\orders\base.html:56
 msgid "Create Order"
 msgstr "إنشاء طلب"
 
-#: .\templates\orders\base.html:56
+#: .\templates\orders\base.html:58
 msgid "Login"
 msgstr "تسجيل الدخول"
 
-#: .\templates\orders\base.html:58 .\templates\orders\orders_table.html:4
+#: .\templates\orders\base.html:60
 msgid "Orders"
 msgstr "الطلبات"
 
-#: .\templates\orders\base.html:59
+#: .\templates\orders\base.html:61
 msgid "Reports"
 msgstr "التقارير"
 
@@ -48,12 +120,12 @@ msgid "Client Name"
 msgstr "اسم العميل"
 
 #: .\templates\orders\create_orders.html:56
-#: .\templates\orders\orders_table.html:68
+#: .\templates\orders\orders_table.html:83
 msgid "Order Details"
 msgstr "تفاصيل الطلب"
 
 #: .\templates\orders\create_orders.html:61
-#: .\templates\orders\orders_table.html:74
+#: .\templates\orders\orders_table.html:89
 msgid "File"
 msgstr "ملف"
 
@@ -62,7 +134,7 @@ msgid "No file selected."
 msgstr "لم يتم اختيار ملف."
 
 #: .\templates\orders\create_orders.html:67
-#: .\templates\orders\orders_table.html:77
+#: .\templates\orders\orders_table.html:92
 msgid "Quantity"
 msgstr "الكمية"
 
@@ -111,12 +183,12 @@ msgid "Active"
 msgstr "نشط"
 
 #: .\templates\orders\index.html:365 .\templates\orders\index.html:417
-#: .\templates\orders\orders_table.html:44
+#: .\templates\orders\orders_table.html:59
 msgid "Order ID"
 msgstr "معرف الطلب"
 
 #: .\templates\orders\index.html:366 .\templates\orders\index.html:418
-#: .\templates\orders\orders_table.html:45
+#: .\templates\orders\orders_table.html:60
 msgid "Client"
 msgstr "العميل"
 
@@ -124,13 +196,9 @@ msgstr "العميل"
 msgid "Created Time"
 msgstr "وقت الإنشاء"
 
-#: .\templates\orders\index.html:368 .\templates\orders\orders_table.html:48
+#: .\templates\orders\index.html:368 .\templates\orders\orders_table.html:63
 msgid "Status"
 msgstr "الحالة"
-
-#: .\templates\orders\index.html:380
-msgid "Processing"
-msgstr "قيد المعالجة"
 
 #: .\templates\orders\index.html:389 .\templates\orders\index.html:435
 msgid "No Orders Found"
@@ -161,8 +229,10 @@ msgid "No Order Selected"
 msgstr "لم يتم اختيار طلب"
 
 #: .\templates\orders\orders_dashboard.html:180
-msgid "Click \""
-msgstr "انقر \""
+#, fuzzy
+#| msgid "Click \""
+msgid "Click \\"
+msgstr "انقر \\"
 
 #: .\templates\orders\orders_dashboard.html:191
 msgid "Accepted Orders"
@@ -176,70 +246,80 @@ msgstr "إنهاء"
 msgid "No accepted orders"
 msgstr "لا توجد طلبات مقبولة"
 
-#: .\templates\orders\orders_table.html:8
+#: .\templates\orders\orders_table.html:5
+#, python-format
+msgid " %(state)s Orders "
+msgstr "الطلبات %(state)s"
+
+#: .\templates\orders\orders_table.html:10
 msgid "From Date"
 msgstr "من تاريخ"
 
-#: .\templates\orders\orders_table.html:12
+#: .\templates\orders\orders_table.html:14
 msgid "To Date"
 msgstr "إلى تاريخ"
 
-#: .\templates\orders\orders_table.html:16
-msgid "Search"
-msgstr "بحث"
-
-#: .\templates\orders\orders_table.html:17
-msgid "Search orders..."
-msgstr "البحث عن طلبات..."
-
-#: .\templates\orders\orders_table.html:20
-msgid "Worker"
-msgstr "العامل"
-
-#: .\templates\orders\orders_table.html:22
-msgid "All Workers"
-msgstr "جميع العمال"
-
-#: .\templates\orders\orders_table.html:46
-msgid "Total Cost"
-msgstr "التكلفة الإجمالية"
-
-#: .\templates\orders\orders_table.html:47
-msgid "Created Date"
-msgstr "تاريخ الإنشاء"
-
-#: .\templates\orders\orders_table.html:80
-msgid "Cost"
-msgstr "التكلفة"
-
-#: .\templates\orders\orders_table.html:83
+#: .\templates\orders\orders_table.html:18
+#: .\templates\orders\orders_table.html:98
 msgid "Features"
 msgstr "الميزات"
 
-#: .\templates\orders\orders_table.html:91
+#: .\templates\orders\orders_table.html:20
+msgid "All Features"
+msgstr "جميع الميزات"
+
+#: .\templates\orders\orders_table.html:31
+msgid "Worker"
+msgstr "العامل"
+
+#: .\templates\orders\orders_table.html:33
+msgid "All Workers"
+msgstr "جميع العمال"
+
+#: .\templates\orders\orders_table.html:44
+msgid "Search"
+msgstr "بحث"
+
+#: .\templates\orders\orders_table.html:45
+msgid "Search orders..."
+msgstr "البحث عن طلبات..."
+
+#: .\templates\orders\orders_table.html:61
+msgid "Total Cost"
+msgstr "التكلفة الإجمالية"
+
+#: .\templates\orders\orders_table.html:62
+msgid "Created Date"
+msgstr "تاريخ الإنشاء"
+
+#: .\templates\orders\orders_table.html:95
+msgid "Cost"
+msgstr "التكلفة"
+
+#: .\templates\orders\orders_table.html:106
 msgid "Download"
 msgstr "تنزيل"
 
-#: .\templates\orders\orders_table.html:95
+#: .\templates\orders\orders_table.html:110
 msgid "File Deleted"
 msgstr "تم حذف الملف"
 
-#: .\templates\orders\orders_table.html:119
+#: .\templates\orders\orders_table.html:134
 msgid "Previous"
 msgstr "السابق"
 
-#: .\templates\orders\orders_table.html:126
+#: .\templates\orders\orders_table.html:141
 msgid "Page"
 msgstr "صفحة"
 
-#: .\templates\orders\orders_table.html:126
+#: .\templates\orders\orders_table.html:141
 msgid "of"
 msgstr "من"
 
-#: .\templates\orders\orders_table.html:134
+#: .\templates\orders\orders_table.html:149
 msgid "Next"
 msgstr "التالي"
 
-#: .\templates\orders\report_dashboard.html:205
+#: .\templates\orders\report_dashboard.html:201
 msgid "Orders Dashboard"
 msgstr "لوحة تحكم الطلبات"
