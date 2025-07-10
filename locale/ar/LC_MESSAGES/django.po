@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-10 16:37+0300\n"
+"POT-Creation-Date: 2025-07-10 16:52+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -304,19 +304,25 @@ msgstr "تنزيل"
 msgid "File Deleted"
 msgstr "تم حذف الملف"
 
-#: .\templates\orders\orders_table.html:134
+#: .\templates\orders\orders_table.html:122
+#, fuzzy
+#| msgid "Total"
+msgid "Total:"
+msgstr "الإجمالي"
+
+#: .\templates\orders\orders_table.html:138
 msgid "Previous"
 msgstr "السابق"
 
-#: .\templates\orders\orders_table.html:141
+#: .\templates\orders\orders_table.html:145
 msgid "Page"
 msgstr "صفحة"
 
-#: .\templates\orders\orders_table.html:141
+#: .\templates\orders\orders_table.html:145
 msgid "of"
 msgstr "من"
 
-#: .\templates\orders\orders_table.html:149
+#: .\templates\orders\orders_table.html:153
 msgid "Next"
 msgstr "التالي"
 
