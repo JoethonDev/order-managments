@@ -1,8 +1,10 @@
 {% load i18n %}
 
+
 <h3 class="section-title">
-    <i class="bi bi-check-circle me-2"></i>{% translate state|capfirst %} {% translate "Orders" %}
+    <i class="bi bi-check-circle me-2"></i>{% blocktrans with state=state_title %} {{ state }} Orders {% endblocktrans %}
 </h3>
+
 <div class="row filters-row align-items-end">
     <div class="col-md-3">
         <label class="form-label fw-semibold">{% translate "From Date" %}</label>
@@ -13,12 +15,21 @@
         <input type="date" class="form-control" id="{{ state }}-to-date" value="{{ to }}" name="to">
     </div>
     <div class="col-md-3">
-        <label class="form-label fw-semibold">{% translate "Search" %}</label>
-        <input type="text" class="form-control" placeholder="{% translate "Search orders..." %}" id="{{ state }}-search" name="query" value="{{ query }}">
+        <label class="form-label fw-semibold">{% translate "Features" %}</label>
+        <select class="form-select" id="{{ state }}-feature" name="feature">
+            <option value="">{% translate "All Features" %}</option>
+            {% for feature in features %}
+                <option value="{{ feature.pk }}" 
+                {% if by == feature.pk %}
+                    selected
+                {% endif %}
+                >{{ feature.feature_name }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <label class="form-label fw-semibold">{% translate "Worker" %}</label>
-        <select class="form-select" id="{{ state }}-worker">
+        <select class="form-select" id="{{ state }}-worker" name="by">
             <option value="">{% translate "All Workers" %}</option>
             {% for worker in workers %}
                 <option value="{{ worker.pk }}" 
@@ -28,6 +39,10 @@
                 >{{ worker.username }}</option>
             {% endfor %}
         </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label fw-semibold">{% translate "Search" %}</label>
+        <input type="text" class="form-control" placeholder="{% translate "Search orders..." %}" id="{{ state }}-search" name="query" value="{{ query }}">
     </div>
     <div class="col-md-1">
         <!-- Here Send request -->

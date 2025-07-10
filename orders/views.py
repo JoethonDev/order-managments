@@ -261,7 +261,7 @@ def order_table(request, state):
     if not request.user.is_authenticated:
         return HttpResponseForbidden("Not authorized!")
     if request.method == "GET":
-        if state not in  ['accepted', 'declined', 'pending', 'processing', "finished"]:
+        if state not in ['accepted', 'declined', 'pending', 'processing', "finished"]:
             return HttpResponseBadRequest(_("Invalid state for orders!"))
 
         CLASSES = {
@@ -276,6 +276,7 @@ def order_table(request, state):
         date_from = request.GET.get("from", "") # Date
         date_to = request.GET.get("to", "") # Date
         by_worker = request.GET.get("by", 0) # ID
+        feature = request.GET.get("feature", 0) # ID
         page = request.GET.get("page", 1)
         filters = {
             "status" : state
@@ -299,7 +300,11 @@ def order_table(request, state):
 
         if by_worker:
             filters['worker_id'] = by_worker
+        
+        if feature:
+            filters['details__features__feature_id'] = feature
 
+        # print(filters)
         orders = Order.objects.filter(**filters).order_by("id")
         orders_page = Paginator(orders, settings.PAGE_SIZE)
         current_page = orders_page.get_page(page)
@@ -322,6 +327,7 @@ def order_table(request, state):
             "next_url" : next_url,
             "previous_url" : prev_url,
             "state" : state,
+            "state_title" : _(state.capitalize()),
             "orders" : [order.serialize() for order in current_page.object_list],
             "num_pages" : current_page.paginator.num_pages,
             "has_previous" : has_previous,
@@ -330,7 +336,8 @@ def order_table(request, state):
             "to" : date_to,
             "from" : date_from,
             "query" : search_query,
-            "workers" : User.objects.all()
+            "workers" : User.objects.all(),
+            "features" : Feature.objects.all()
         })
     
     return HttpResponseNotAllowed(["POST", "PATCH", "DELETE", "PUT"])
