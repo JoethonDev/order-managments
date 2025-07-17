@@ -109,7 +109,7 @@
             </button>
         </form>
     </div>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ---- Helper Functions ----
@@ -128,7 +128,10 @@
                     'estimationNote': 'this is just estimation, and may not be accurate',
                     'notesPlaceholder': 'If there is any notes to be considered write here...',
                     'remove': 'Remove',
-                    'orderCost': 'Order Cost'
+                    'orderCost': 'Order Cost',
+                    'File': 'File',
+                    'Quantity': 'Quantity',
+                    'Notes': 'Notes'
                 },
                 'ar': {
                     'noFileSelected': 'لم يتم اختيار ملف.',
@@ -143,10 +146,14 @@
                     'estimationNote': 'هذا مجرد تقدير، وقد لا يكون دقيقًا',
                     'notesPlaceholder': 'إذا كان هناك أي ملاحظات يجب أخذها في الاعتبار اكتبها هنا...',
                     'remove': 'إزالة',
-                    'orderCost': 'تكلفة الطلب'
+                    'orderCost': 'تكلفة الطلب',
+                    'File': 'الملف',
+                    'Quantity': 'الكمية',
+                    'Notes': 'ملاحظات'
                 }
             };
 
+            // Get Translation
             function getTranslation(key, params = {}) {
                 const lang = document.documentElement.lang || 'en';
                 let message = translations[lang][key] || translations['en'][key];
@@ -268,7 +275,7 @@
                                     fileInput.dataset.isUploaded = 'true';
                                     urlInput.value = r2Key
                                     let itemElement = fileInput.closest('.order-detail-item')                   
-                                    updateOrderCost(itemElement);
+                                    await updateOrderCost(itemElement);
                                     resolve(true); // Resolve promise indicating success
                                 } else {
                                     statusElement.textContent = getTranslation('uploadFailed', { fileName: file.name, status: xhr.status, statusText: xhr.statusText });
@@ -335,23 +342,28 @@
 
 
             // Function to count pdf pages
-            function countFilePages(file) {
-                const reader = new FileReader();
-                // const fileInfo = event.target.files[0];
-                const fileInfo = file;
-                if (fileInfo) {
-                    reader.readAsBinaryString(file);
-                    const pageCount = reader.onloadend = () => {
-                        const count = reader.result.match(/\/Type[\s]*\/Page[^s]/g).length;
-                        console.log('Number of Pages:', count);
-                        return count
-                    }
-                    return pageCount()
-                }
+            async function countFilePages(file) {
+                const arrayBuffer = await file.arrayBuffer();
+
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                return pdf.numPages;
+
+                // const reader = new FileReader();
+                // // const fileInfo = event.target.files[0];
+                // const fileInfo = file;
+                // if (fileInfo) {
+                //     reader.readAsBinaryString(file);
+                //     const pageCount = reader.onloadend = () => {
+                //         const count = reader.result.match(/\/Type[\s]*\/Page[^s]/g).length;
+                //         console.log('Number of Pages:', count);
+                //         return count
+                //     }
+                //     return pageCount()
+                // }
             }
 
             // Function to calculate and update the order cost for a specific item
-            function updateOrderCost(itemElement) {
+            async function updateOrderCost(itemElement) {
                 const quantityInput = itemElement.querySelector('.quantity-input');
                 const featureSelect = itemElement.querySelectorAll('.feature-select');
                 const orderCostDisplay = itemElement.querySelector('.order-cost-display');
@@ -360,7 +372,7 @@
                 let failPageCount = false
 
                 try{
-                    pageCount = countFilePages(filePage.files[0])
+                    pageCount = await countFilePages(filePage.files[0])
                 }
                 catch {
                     failPageCount = true
@@ -369,7 +381,9 @@
                 let costPerFeature = 0;
                 featureSelect.forEach(feature => {
                     const selectedOption = feature.options[feature.selectedIndex];
-                    costPerFeature += +selectedOption.dataset.price
+                    const dataPrice = selectedOption.dataset.price
+                    const number = parseFloat(dataPrice.replace(',', '.'));
+                    costPerFeature += number
                 })
                 console.log(`Quantity : ${quantity}`)
                 console.log(`cost : ${costPerFeature}`)
@@ -380,11 +394,11 @@
 
             // ---- EventListeners ----
             // Event listener for changes in quantity or feature for existing items
-            orderDetailsContainer.addEventListener('input', function(event) {
+            orderDetailsContainer.addEventListener('input', async function(event) {
                 // Cost calculation for quantity/feature changes
                 if (event.target.classList.contains('quantity-input') || event.target.classList.contains('feature-select')) {
                     const itemElement = event.target.closest('.order-detail-item');
-                    updateOrderCost(itemElement);
+                    await updateOrderCost(itemElement);
                 }
 
                 // File upload event
