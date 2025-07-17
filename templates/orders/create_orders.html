@@ -199,6 +199,7 @@
                 }
                 return cookieValue;
             }
+            
             // Function to show the loading spinner
             function showLoadingSpinner() {
                 buttonText.textContent = getTranslation('submitting'); // Change button text
@@ -232,7 +233,7 @@
 
                 try {
                     // 1. Request presigned URL from backend
-                    const presignedResponse = await fetch('/api/get-presigned-url/', {
+                    const presignedResponse = await fetch('{% url "presigned-upload" %}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -266,6 +267,8 @@
                                     statusElement.style.color = 'green';
                                     fileInput.dataset.isUploaded = 'true';
                                     urlInput.value = r2Key
+                                    let itemElement = fileInput.closest('.order-detail-item')                   
+                                    updateOrderCost(itemElement);
                                     resolve(true); // Resolve promise indicating success
                                 } else {
                                     statusElement.textContent = getTranslation('uploadFailed', { fileName: file.name, status: xhr.status, statusText: xhr.statusText });
@@ -314,6 +317,7 @@
                                        // if you want to manually remove it after the transition.
                 }, duration);
             }
+            
             // ---- End Helper Functions ----
             let orderDetailCount = 1; // Keep track of the number of order detail sections
 
@@ -391,7 +395,7 @@
                     const urlInput = itemId.querySelector(".file-url")
                     uploadFileToR2(fileInput, urlInput, statusElement);
                 }
-                });
+            });
 
             // Function to duplicate the order detail fields
             addOrderDetailButton.addEventListener('click', function() {
@@ -409,7 +413,7 @@
                     selectElement.selectedIndex = 0
                 }) // Reset feature selection
 
-                newItem.querySelector('.order-cost-display').value = "0.00"; // Reset cost
+                newItem.querySelector('.order-cost-display').value = `$0.00`; // Reset cost
                 newItem.querySelector('.file-status').textContent = getTranslation('noFileSelected'); // Reset file status
 
                 // Add a remove button for the new duplicated items
@@ -429,9 +433,6 @@
 
 
                 orderDetailsContainer.appendChild(newItem);
-
-                // Re-calculate cost for the newly added item (which will be $0.00 initially)
-                updateOrderCost(newItem);
             });
 
             // Event listener for removing order detail items
